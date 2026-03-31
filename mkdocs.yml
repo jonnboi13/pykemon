@@ -6,6 +6,7 @@ nav:
   - API: API.md
   - Vignettes:
     - Power Creep: power-creep.md
+    - Team Editor: team_editor.md
 theme:
   name: material
   icon:
