@@ -8,8 +8,14 @@ import polars as pl
 DB_PATH = "src/pykemon/data/pykemon.duckdb"
 
 
+
 def make_db(con: duckdb.DuckDBPyConnection):
     """Create all tables in the database."""
+    con.execute("CREATE SEQUENCE IF NOT EXISTS team_id_seq START 1")
+    con.execute("CREATE SEQUENCE IF NOT EXISTS team_pokemon_id_seq START 1")
+    con.execute("CREATE SEQUENCE IF NOT EXISTS team_pokemon_move_id_seq START 1")
+
+
     con.execute("""
         CREATE TABLE IF NOT EXISTS pokemon (
             pokemon_id      INTEGER PRIMARY KEY,
@@ -109,6 +115,46 @@ def make_db(con: duckdb.DuckDBPyConnection):
     """)
 
 
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS team (
+            team_id   INTEGER PRIMARY KEY DEFAULT nextval('team_id_seq'),
+            team_name VARCHAR NOT NULL UNIQUE
+        )
+    """)
+
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS team_pokemon (
+        team_pokemon_id   INTEGER PRIMARY KEY DEFAULT nextval('team_pokemon_id_seq'),
+        team_id           INTEGER NOT NULL REFERENCES team(team_id),
+        pokemon_id        INTEGER NOT NULL REFERENCES pokemon(pokemon_id),
+        ability_id        INTEGER NOT NULL REFERENCES ability(ability_id),
+        nature_id         INTEGER NOT NULL REFERENCES nature(nature_id),
+        item_id           INTEGER REFERENCES item(item_id),
+        health_IV         INTEGER DEFAULT 31,
+        attack_IV         INTEGER DEFAULT 31,
+        defense_IV        INTEGER DEFAULT 31,
+        sp_atk_IV         INTEGER DEFAULT 31,
+        sp_def_IV         INTEGER DEFAULT 31,
+        speed_IV          INTEGER DEFAULT 31,
+        health_EV         INTEGER DEFAULT 0,
+        attack_EV         INTEGER DEFAULT 0,
+        defense_EV        INTEGER DEFAULT 0,
+        sp_atk_EV         INTEGER DEFAULT 0,
+        sp_def_EV         INTEGER DEFAULT 0,
+        speed_EV          INTEGER DEFAULT 0,
+        level             INTEGER DEFAULT 100
+    )
+    """)
+
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS team_pokemon_move (
+            team_pokemon_move_id  INTEGER PRIMARY KEY DEFAULT nextval('team_pokemon_move_id_seq'),
+            team_pokemon_id       INTEGER NOT NULL REFERENCES team_pokemon(team_pokemon_id),
+            move_id               INTEGER NOT NULL REFERENCES move(move_id)
+        )
+    """)
+
+
 def insert_pokemon(con, df: pl.DataFrame):
     df = df.with_row_index("pokemon_id", offset=1)
     con.execute("""
@@ -150,6 +196,17 @@ def insert_status_effects(con, df: pl.DataFrame):
     df = df.with_row_index("status_effect_id", offset=1)
     con.execute("INSERT INTO status_effect SELECT * FROM df")
 
+def insert_team(con, df: pl.DataFrame):
+    df = df.with_row_index("team_id", offset=1)
+    con.execute("INSERT INTO team SELECT * FROM df")
+
+def insert_team_pokemon(con, df: pl.DataFrame):
+    df = df.with_row_index("team_pokemon_id", offset=1)
+    con.execute("INSERT INTO team_pokemon SELECT * FROM df")
+
+def insert_team_pokemon_move(con, df: pl.DataFrame):
+    df = df.with_row_index("team_pokemon_move_id", offset=1)
+    con.execute("INSERT INTO team_pokemon_move SELECT * FROM df")
 
 def print_schema(con: duckdb.DuckDBPyConnection):
     """Print all tables and their columns."""
