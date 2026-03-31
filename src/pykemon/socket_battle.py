@@ -25,8 +25,8 @@ from .battle import (
     BattlePokemon,
     Move,
     format_events,
-    get_pokemon_list,
-    load_pokemon,
+    get_team_list,  # replaces get_pokemon_list
+    load_team,  # replaces load_pokemon
     resolve_turn,
 )
 
@@ -34,6 +34,7 @@ DEFAULT_PORT = 5555
 
 
 # ── Buffered connection ───────────────────────────────────────────────────────
+
 
 class _Conn:
     """Wraps a TCP socket with a persistent buffer for newline-delimited JSON."""
@@ -63,6 +64,7 @@ class _Conn:
 
 # ── Display helpers ───────────────────────────────────────────────────────────
 
+
 def _show_roster(roster: list) -> None:
     print("\n  Available Pokemon:")
     print("  " + "─" * 42)
@@ -70,6 +72,14 @@ def _show_roster(roster: list) -> None:
         types = f"{t1}/{t2}" if t2 else t1
         print(f"  {i + 1:2}. {name:<16} [{types}]")
     print("  " + "─" * 42)
+
+
+def _show_teams(teams: list) -> None:
+    print("\n  Your Teams:")
+    print("  " + "─" * 30)
+    for i, (_, name) in enumerate(teams):
+        print(f"  {i + 1:2}. {name}")
+    print("  " + "─" * 30)
 
 
 def _prompt_int(prompt: str, lo: int, hi: int) -> int:
@@ -117,26 +127,27 @@ def _show_moves(poke: BattlePokemon) -> None:
 
 # ── Pokemon serialization ─────────────────────────────────────────────────────
 
+
 def _poke_to_dict(p: BattlePokemon) -> dict:
     return {
-        "pokemon_id":    p.pokemon_id,
-        "name":          p.name,
-        "primary_type":  p.primary_type,
+        "pokemon_id": p.pokemon_id,
+        "name": p.name,
+        "primary_type": p.primary_type,
         "secondary_type": p.secondary_type,
-        "max_hp":        p.max_hp,
-        "current_hp":    p.current_hp,
-        "attack":        p.attack,
-        "defense":       p.defense,
-        "sp_atk":        p.sp_atk,
-        "sp_def":        p.sp_def,
-        "speed":         p.speed,
+        "max_hp": p.max_hp,
+        "current_hp": p.current_hp,
+        "attack": p.attack,
+        "defense": p.defense,
+        "sp_atk": p.sp_atk,
+        "sp_def": p.sp_def,
+        "speed": p.speed,
         "moves": [
             {
-                "move_id":  m.move_id,
-                "name":     m.name,
-                "type":     m.type,
+                "move_id": m.move_id,
+                "name": m.name,
+                "type": m.type,
                 "category": m.category,
-                "power":    m.power,
+                "power": m.power,
                 "accuracy": m.accuracy,
             }
             for m in p.moves
@@ -164,9 +175,10 @@ def _dict_to_poke(d: dict) -> BattlePokemon:
 
 # ── Host (server) ─────────────────────────────────────────────────────────────
 
+
 def run_host(port: int = DEFAULT_PORT) -> None:
     """Start a battle server and wait for one opponent to connect."""
-    roster = get_pokemon_list()
+    teams = get_team_list()
 
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -181,27 +193,32 @@ def run_host(port: int = DEFAULT_PORT) -> None:
     conn = _Conn(raw_sock)
     print(f"  Opponent connected from {addr[0]}!\n")
 
-    # ── Pokemon selection ──────────────────────────────────────────────────────
-    conn.send({"action": "choose_pokemon", "roster": [list(r) for r in roster]})
+    # ── Team selection ─────────────────────────────────────────────────────────
+    conn.send({"action": "choose_team", "teams": [list(t) for t in teams]})
 
-    _show_roster(roster)
-    host_idx = _prompt_int("  Pick your Pokemon (number): ", 1, len(roster)) - 1
+    _show_teams(teams)
+    host_idx = _prompt_int("  Pick your team (number): ", 1, len(teams)) - 1
 
     opp_msg = conn.recv()
     opp_idx = opp_msg["index"]
 
-    host_poke = load_pokemon(roster[host_idx][0])
-    opp_poke  = load_pokemon(roster[opp_idx][0])
+    host_team = load_team(teams[host_idx][0])
+    opp_team = load_team(teams[opp_idx][0])
 
-    print(f"\n  You chose:      {host_poke.name}")
-    print(f"  Opponent chose: {opp_poke.name}\n")
+    print(f"\n  You chose:      {teams[host_idx][1]}")
+    print(f"  Opponent chose: {teams[opp_idx][1]}\n")
 
-    conn.send({
-        "action":       "battle_start",
-        "your_pokemon": _poke_to_dict(opp_poke),
-        "enemy_name":   host_poke.name,
-        "enemy_max_hp": host_poke.max_hp,
-    })
+    conn.send(
+        {
+            "action": "battle_start",
+            "your_team": [_poke_to_dict(p) for p in opp_team],
+            "enemy_name": host_team[0].name,
+            "enemy_max_hp": host_team[0].max_hp,
+        }
+    )
+
+    host_poke = host_team[0]
+    opp_poke = opp_team[0]
 
     # ── Battle loop ────────────────────────────────────────────────────────────
     for turn in range(1, 9999):
@@ -209,13 +226,15 @@ def run_host(port: int = DEFAULT_PORT) -> None:
         _show_field(host_poke, opp_poke.name, opp_poke.current_hp, opp_poke.max_hp)
         _show_moves(host_poke)
 
-        conn.send({
-            "action":    "your_turn",
-            "turn":      turn,
-            "your_hp":   opp_poke.current_hp,
-            "enemy_hp":  host_poke.current_hp,
-            "enemy_max_hp": host_poke.max_hp,
-        })
+        conn.send(
+            {
+                "action": "your_turn",
+                "turn": turn,
+                "your_hp": opp_poke.current_hp,
+                "enemy_hp": host_poke.current_hp,
+                "enemy_max_hp": host_poke.max_hp,
+            }
+        )
 
         # Collect moves from both players simultaneously
         opp_move_holder = [0]
@@ -233,13 +252,16 @@ def run_host(port: int = DEFAULT_PORT) -> None:
         t.start()
 
         host_move_idx = (
-            _prompt_int(f"  Your move (1-{len(host_poke.moves)}): ", 1, len(host_poke.moves)) - 1
+            _prompt_int(
+                f"  Your move (1-{len(host_poke.moves)}): ", 1, len(host_poke.moves)
+            )
+            - 1
         )
         opp_ready.wait()
         opp_move_idx = opp_move_holder[0]
 
         host_move = host_poke.moves[host_move_idx]
-        opp_move  = opp_poke.moves[opp_move_idx]
+        opp_move = opp_poke.moves[opp_move_idx]
 
         events = resolve_turn(host_poke, host_move, opp_poke, opp_move)
 
@@ -247,12 +269,14 @@ def run_host(port: int = DEFAULT_PORT) -> None:
         for line in format_events(events, "host"):
             print(f"  {line}")
 
-        conn.send({
-            "action":    "turn_result",
-            "events":    format_events(events, "opp"),
-            "your_hp":   opp_poke.current_hp,
-            "enemy_hp":  host_poke.current_hp,
-        })
+        conn.send(
+            {
+                "action": "turn_result",
+                "events": format_events(events, "opp"),
+                "your_hp": opp_poke.current_hp,
+                "enemy_hp": host_poke.current_hp,
+            }
+        )
 
         # Game over check
         if host_poke.is_fainted or opp_poke.is_fainted:
@@ -273,6 +297,7 @@ def run_host(port: int = DEFAULT_PORT) -> None:
 
 # ── Client (guest) ────────────────────────────────────────────────────────────
 
+
 def run_client(host_ip: str, port: int = DEFAULT_PORT) -> None:
     """Connect to a host and start a battle."""
     print(f"\n  Connecting to {host_ip}:{port}...")
@@ -281,23 +306,25 @@ def run_client(host_ip: str, port: int = DEFAULT_PORT) -> None:
     conn = _Conn(raw_sock)
     print("  Connected!\n")
 
-    # ── Pokemon selection ──────────────────────────────────────────────────────
-    msg = conn.recv()  # choose_pokemon
-    roster = [tuple(r) for r in msg["roster"]]
+    # ── Team selection ─────────────────────────────────────────────────────────
+    msg = conn.recv()  # choose_team
+    teams = [tuple(t) for t in msg["teams"]]
 
-    _show_roster(roster)
-    idx = _prompt_int("  Pick your Pokemon (number): ", 1, len(roster)) - 1
+    _show_teams(teams)
+    idx = _prompt_int("  Pick your team (number): ", 1, len(teams)) - 1
     conn.send({"index": idx})
 
     # ── Battle start ───────────────────────────────────────────────────────────
     msg = conn.recv()  # battle_start
-    my_poke      = _dict_to_poke(msg["your_pokemon"])
-    enemy_name   = msg["enemy_name"]
+    my_team = [_dict_to_poke(p) for p in msg["your_team"]]
+    enemy_name = msg["enemy_name"]
     enemy_max_hp = msg["enemy_max_hp"]
-    enemy_hp     = enemy_max_hp
+    enemy_hp = enemy_max_hp
 
-    print(f"\n  You chose:      {my_poke.name}")
-    print(f"  Opponent chose: {enemy_name}\n")
+    my_poke = my_team[0]
+
+    print(f"\n  You chose:      {teams[idx][1]}")
+    print(f"  Opponent chose: {enemy_name.split()[0]}...\n")  # enemy lead name only
 
     # ── Battle loop ────────────────────────────────────────────────────────────
     while True:
@@ -312,7 +339,10 @@ def run_client(host_ip: str, port: int = DEFAULT_PORT) -> None:
             _show_moves(my_poke)
 
             move_idx = (
-                _prompt_int(f"  Your move (1-{len(my_poke.moves)}): ", 1, len(my_poke.moves)) - 1
+                _prompt_int(
+                    f"  Your move (1-{len(my_poke.moves)}): ", 1, len(my_poke.moves)
+                )
+                - 1
             )
             conn.send({"index": move_idx})
 
