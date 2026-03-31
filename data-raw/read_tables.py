@@ -7,7 +7,7 @@ import duckdb
 from pathlib import Path
 # %%
 
-con = duckdb.connect("../src/pykemon/data/pykemon.duckdb")
+con = duckdb.connect("..\src\pykemon\data\pykemon.duckdb")
 
 
 pokemon = con.sql("SELECT * FROM pokemon").pl()
@@ -18,6 +18,9 @@ abilities = con.sql("SELECT * FROM ability").pl()
 pokemon_abilities = con.sql("SELECT * FROM pokemon_ability").pl()
 natures = con.sql("SELECT * FROM nature").pl()
 status_effects = con.sql("SELECT * FROM status_effect").pl()
+team = con.sql("SELECT * FROM team").pl()
+team_pokemon = con.sql("SELECT * FROM team_pokemon").pl()
+team_pokemon_move = con.sql("SELECT * FROM team_pokemon_move").pl()
 
 # Sanity checks
 print("=== Row counts ===")
@@ -57,3 +60,5 @@ con.close()
 
 # %%
 pokemon_moves.group_by("pokemon_name", "move_name").agg(pl.len())
+
+# %%
