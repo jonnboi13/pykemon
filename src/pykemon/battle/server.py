@@ -148,25 +148,23 @@ class BattleServer:
         con.close()
         return teams
 
-        def _battle_loop(self) -> None:
-            self.events = []
-            self._broadcast_full_state(awaiting="action")
+    def _battle_loop(self) -> None:
+        self.events = []
+        self._broadcast_full_state(awaiting="action")
 
-            while not self.is_over:
-                action1, action2 = self._collect_actions()
-                self.turn += 1
-                self.events = [f"Turn {self.turn} begins."]
-                self._resolve_turn(action1, action2)
-                if not self.is_over:
-                    self._broadcast_full_state(awaiting="action")
+        while not self.is_over:
+            action1, action2 = self._collect_actions()
+            self.turn += 1
+            self.events = [f"Turn {self.turn} begins."]
+            self._resolve_turn(action1, action2)
+            if not self.is_over:
+                self._broadcast_full_state(awaiting="action")
 
-            # Final broadcast after battle ends
-            self._broadcast_full_state(awaiting="none")
-            print(
-                f"\n  Battle over! Winner: {self.winner.name if self.winner else 'draw'}"
-            )
-            self.sock1.close()
-            self.sock2.close()
+        # Final broadcast after battle ends
+        self._broadcast_full_state(awaiting="none")
+        print(f"\n  Battle over! Winner: {self.winner.name if self.winner else 'draw'}")
+        self.sock1.close()
+        self.sock2.close()
 
     # ── Action collection ─────────────────────────────────────────────────────
 
