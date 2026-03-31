@@ -56,6 +56,47 @@ def get_abilities_for_pokemon(con, pokemon_id):
 def get_all_natures(con):
     return con.execute("SELECT nature_id, name, stat_up, stat_down FROM nature ORDER BY nature_id").fetchall()
 
+def get_pokemon_stats_with_nature(con, team_pokemon_id):
+    """Return base stats modified by the pokemon's nature."""
+    result = con.execute("""
+        SELECT 
+            p.hp, p.attack, p.defense, p.sp_atk, p.sp_def, p.speed,
+            n.stat_up, n.stat_down
+        FROM team_pokemon tp
+        JOIN pokemon p ON tp.pokemon_id = p.pokemon_id
+        JOIN nature n ON tp.nature_id = n.nature_id
+        WHERE tp.team_pokemon_id = ?
+    """, (team_pokemon_id,)).fetchone()
+
+    hp, attack, defense, sp_atk, sp_def, speed, stat_up, stat_down = result
+
+    stat_map = {
+        "Attack":   "attack",
+        "Defense":  "defense",
+        "Sp. Atk":  "sp_atk",
+        "Sp. Def":  "sp_def",
+        "Speed":    "speed",
+    }
+
+    stats = {
+        "hp":      hp,
+        "attack":  attack,
+        "defense": defense,
+        "sp_atk":  sp_atk,
+        "sp_def":  sp_def,
+        "speed":   speed,
+    }
+
+    if stat_up and stat_up in stat_map:
+        key = stat_map[stat_up]
+        stats[key] = round(stats[key] * 1.1)
+
+    if stat_down and stat_down in stat_map:
+        key = stat_map[stat_down]
+        stats[key] = round(stats[key] * 0.9)
+
+    return stats    
+
 
 def get_first_move_for_pokemon(con, pokemon_id):
     return con.execute("""
@@ -327,7 +368,10 @@ def edit_team(con, team_id, team_name):
             for i, (tp_id, name, pid) in enumerate(pokemon_list, 1):
                 moves = get_pokemon_moves(con, tp_id)
                 move_names = ", ".join(m[1] for m in moves) if moves else "no moves"
+                stats = get_pokemon_stats_with_nature(con, tp_id)
                 print(f"  {i}. {name} — [{move_names}]")
+                print(f"       HP:{stats['hp']} ATK:{stats['attack']} DEF:{stats['defense']} "
+                      f"SpA:{stats['sp_atk']} SpD:{stats['sp_def']} SPE:{stats['speed']}")
         else:
             print("  (no pokemon yet)")
 
