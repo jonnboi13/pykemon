@@ -62,3 +62,5 @@ con.close()
 pokemon_moves.group_by("pokemon_name", "move_name").agg(pl.len())
 
 # %%
+team.filter(pl.col("team_name") == "Mitchell").join(team_pokemon, on="team_id").join(pokemon, on="pokemon_id")
+# %%

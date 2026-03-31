@@ -1,0 +1,78 @@
+[
+    {
+        "team": {"team_name": "Fire Squad"},
+        "pokemon": [
+            {"pokemon_id": 6,   "ability_id": 1, "nature_id": 1},
+            {"pokemon_id": 38,  "ability_id": 2, "nature_id": 2},
+            {"pokemon_id": 59,  "ability_id": 1, "nature_id": 3},
+            {"pokemon_id": 78,  "ability_id": 1, "nature_id": 4},
+            {"pokemon_id": 136, "ability_id": 2, "nature_id": 5},
+            {"pokemon_id": 145, "ability_id": 3, "nature_id": 6}
+        ],
+        "moves": [
+            [53, 94, 76, 14],
+            [53, 86, 76, 50],
+            [53, 24, 76, 44],
+            [53, 76, 50, 32],
+            [53, 44, 76, 14],
+            [86, 97, 57, 65]
+        ]
+    },
+    {
+        "team": {"team_name": "Water Warriors"},
+        "pokemon": [
+            {"pokemon_id": 9,   "ability_id": 4, "nature_id": 7},
+            {"pokemon_id": 55,  "ability_id": 5, "nature_id": 8},
+            {"pokemon_id": 62,  "ability_id": 4, "nature_id": 9},
+            {"pokemon_id": 121, "ability_id": 6, "nature_id": 10},
+            {"pokemon_id": 130, "ability_id": 7, "nature_id": 11},
+            {"pokemon_id": 131, "ability_id": 8, "nature_id": 12}
+        ],
+        "moves": [
+            [57, 58, 99, 14],
+            [57, 58, 94, 86],
+            [57, 2,  67, 99],
+            [57, 58, 94, 86],
+            [57, 58, 44, 82],
+            [57, 58, 44, 86]
+        ]
+    },
+    {
+        "team": {"team_name": "Psychic Masters"},
+        "pokemon": [
+            {"pokemon_id": 65,  "ability_id": 9,  "nature_id": 13},
+            {"pokemon_id": 80,  "ability_id": 10, "nature_id": 14},
+            {"pokemon_id": 96,  "ability_id": 9,  "nature_id": 15},
+            {"pokemon_id": 103, "ability_id": 11, "nature_id": 16},
+            {"pokemon_id": 122, "ability_id": 9,  "nature_id": 17},
+            {"pokemon_id": 124, "ability_id": 12, "nature_id": 18}
+        ],
+        "moves": [
+            [94, 86, 50, 100],
+            [94, 57, 58, 44],
+            [94, 86, 50, 100],
+            [94, 76, 78, 99],
+            [94, 86, 50, 100],
+            [94, 58, 78, 44]
+        ]
+    },
+    {
+        "team": {"team_name": "Mitchell"},
+        "pokemon": [
+            {"pokemon_id": 476,  "ability_id": 9,  "nature_id": 13},
+            {"pokemon_id": 478,  "ability_id": 10, "nature_id": 14},
+            {"pokemon_id": 474,  "ability_id": 9,  "nature_id": 15},
+            {"pokemon_id": 966, "ability_id": 11, "nature_id": 16},
+            {"pokemon_id": 608, "ability_id": 9,  "nature_id": 17},
+            {"pokemon_id": 124, "ability_id": 12, "nature_id": 18}
+        ],
+        "moves": [
+            [94, 86, 50, 100],
+            [94, 57, 58, 44],
+            [94, 86, 50, 100],
+            [94, 76, 78, 99],
+            [94, 86, 50, 100],
+            [94, 58, 78, 44]
+        ]
+    }
+]

@@ -281,6 +281,42 @@ def insert_team_pokemon_move(con, df: pl.DataFrame):
     df = df.with_row_index("team_pokemon_move_id", offset=1)
     con.execute("INSERT INTO team_pokemon_move SELECT * FROM df")
 
+def insert_base_teams(con, base_teams: list[dict]):
+    for entry in base_teams:
+        # 1. Insert team
+        team_name = entry["team"]["team_name"]
+        con.execute("INSERT OR IGNORE INTO team (team_name) VALUES (?)", (team_name,))
+        
+        # 2. Fetch the team_id dynamically
+        team_id = con.execute(
+            "SELECT team_id FROM team WHERE team_name = ?", (team_name,)
+        ).fetchone()[0]
+
+        # 3. Insert each pokemon on the team
+        for i, poke in enumerate(entry["pokemon"]):
+            con.execute("""
+                INSERT INTO team_pokemon (
+                    team_id, pokemon_id, ability_id, nature_id
+                ) VALUES (?, ?, ?, ?)
+            """, (
+                team_id,
+                poke["pokemon_id"],
+                poke["ability_id"],
+                poke["nature_id"],
+            ))
+
+            # 4. Fetch the team_pokemon_id just inserted
+            team_pokemon_id = con.execute(
+                "SELECT currval('team_pokemon_id_seq')"
+            ).fetchone()[0]
+
+            # 5. Insert the 4 moves for this pokemon
+            for move_id in entry["moves"][i]:
+                con.execute("""
+                    INSERT INTO team_pokemon_move (team_pokemon_id, move_id)
+                    VALUES (?, ?)
+                """, (team_pokemon_id, move_id))
+
 
 def print_schema(con: duckdb.DuckDBPyConnection):
     """Print all tables and their columns."""
