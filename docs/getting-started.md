@@ -32,6 +32,12 @@ con = get_connection()
 
 The connection is **read-only**, so you can query freely without worrying about accidentally modifying the data.
 
+To verify your connection and see the available tables directly from your terminal or notebook, you can run:
+
+```py
+con.execute("SHOW TABLES").fetchall()
+[('ability',), ('item',), ('move',), ('nature',), ('pokemon',), ('pokemon_ability',), ('pokemon_move',), ('status_effect',), ('team',), ('team_pokemon',), ('team_pokemon_move',)]
+```
 ---
 
 ## What's in the Database?
