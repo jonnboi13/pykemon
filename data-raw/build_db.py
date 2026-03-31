@@ -113,6 +113,45 @@ def make_db(con: duckdb.DuckDBPyConnection):
         )
     """)
 
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS team (
+            team_id   INTEGER PRIMARY KEY DEFAULT nextval('team_id_seq'),
+            team_name VARCHAR NOT NULL UNIQUE
+        )
+    """)
+
+    con.execute("""
+    CREATE TABLE IF NOT EXISTS team_pokemon (
+        team_pokemon_id   INTEGER PRIMARY KEY DEFAULT nextval('team_pokemon_id_seq'),
+        team_id           INTEGER NOT NULL REFERENCES team(team_id),
+        pokemon_id        INTEGER NOT NULL REFERENCES pokemon(pokemon_id),
+        ability_id        INTEGER NOT NULL REFERENCES ability(ability_id),
+        nature_id         INTEGER NOT NULL REFERENCES nature(nature_id),
+        item_id           INTEGER REFERENCES item(item_id),
+        health_IV         INTEGER DEFAULT 31,
+        attack_IV         INTEGER DEFAULT 31,
+        defense_IV        INTEGER DEFAULT 31,
+        sp_atk_IV         INTEGER DEFAULT 31,
+        sp_def_IV         INTEGER DEFAULT 31,
+        speed_IV          INTEGER DEFAULT 31,
+        health_EV         INTEGER DEFAULT 0,
+        attack_EV         INTEGER DEFAULT 0,
+        defense_EV        INTEGER DEFAULT 0,
+        sp_atk_EV         INTEGER DEFAULT 0,
+        sp_def_EV         INTEGER DEFAULT 0,
+        speed_EV          INTEGER DEFAULT 0,
+        level             INTEGER DEFAULT 100
+    )
+    """)
+
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS team_pokemon_move (
+            team_pokemon_move_id  INTEGER PRIMARY KEY DEFAULT nextval('team_pokemon_move_id_seq'),
+            team_pokemon_id       INTEGER NOT NULL REFERENCES team_pokemon(team_pokemon_id),
+            move_id               INTEGER NOT NULL REFERENCES move(move_id)
+        )
+    """)
+
 
 def get_gen_from_number(number: int) -> int:
     if number <= 151:
@@ -170,8 +209,27 @@ def insert_pokemon(con, df: pl.DataFrame):
     )
 
     con.execute("""
-        INSERT INTO pokemon SELECT * FROM df
-    """)
+    INSERT INTO pokemon
+    SELECT 
+        pokemon_id,
+        CAST(number AS INTEGER),
+        name,
+        base_name,
+        form_name,
+        primary_type,
+        secondary_type,
+        total,
+        hp,
+        attack,
+        defense,
+        sp_atk,
+        sp_def,
+        speed,
+        generation,
+        link,
+        sprite_url
+        FROM df
+""")
 
 
 def insert_items(con, df: pl.DataFrame):
