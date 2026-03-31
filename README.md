@@ -1,87 +1,68 @@
-# Building Python Packages
+# 🔴 pykemon
 
-We are following the guide from [Python Packages](https://py-pkgs.org/welcome) by Tomas Beuzen and Tiffany Timbers for the structure of this template repo.  This readme documents differences from their guide and elements that need to be changed in the repo once you use this template for your own named package.
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-green)](https://byuirpytooling.github.io/pykemon)
 
-## Files to change once template is copied
+A Python package that gives data science students easy access to a rich Pokémon database — covering all 9 generations of Pokémon, moves, abilities, items, natures, and more. No scraping, no setup, just query and go.
 
-These files/folders largely need to be edited to use the name of your package instead of the `pykemon` name. The `pyproject.toml` will also need author editing.
+---
 
-- [`tests/test_template_package.py`](https://github.com/byuirpytooling/pykemon/blob/main/tests/test_template_package.py)
-- [`src/pykemon`](https://github.com/byuirpytooling/pykemon/tree/main/src/pykemon)
-- [`src/pykemon/__init__.py`](https://github.com/byuirpytooling/pykemon/blob/main/src/pykemon/__init__.py)
-- [`main/pyproject.toml`](https://github.com/byuirpytooling/pykemon/blob/main/pyproject.toml)
-- [`mkdocs.yml`](https://github.com/byuirpytooling/pykemon/blob/main/mkdocs.yml)
-- [`docs/API.md`](https://github.com/byuirpytooling/pykemon/blob/main/docs/API.md)
+## 📦 Installation
 
-## Differences from the Python Packages book
-
-###  Python Installation
-
-We will use [uv](https://docs.astral.sh/uv/guides/install-python/) instead of [conda](https://anaconda.org/anaconda/conda).
-
-### Installing uv and python
-
-1. Follow [uv's installation scripts](https://docs.astral.sh/uv/getting-started/installation/#installation-methods)
-2. Now run `uv python install --default`.
-  - You can see your available python versions with `uv python list`.
-  - If you want a specific version of python you can run `uv python install 3.12` for example.
-  - You can upgrade to the latest supported patch release for each version with `uv python upgrade`
-3. Now you can install the two python packages recommended `uv pip install poetry cookiecutter --system`
-4. I propose skipping the PyPI setup and the rest of chapter 2 for now.
-
-## mkdocs-material
-
-1. mkdocs-material with `uv pip install mkdocs-material --system`
-2. [Guide on mkdocs-material](https://www.youtube.com/watch?v=xlABhbnNrfI) and his [companion website for this video](https://jameswillett.dev/getting-started-with-material-for-mkdocs/)
- - However, we are using `uv` and will use `uv run mkdocs new .` instead of `mkdocs new .`
-
-## Handy `uv` commands 
-
-### Install a package from Github repository
-
+**pip:**
 ```bash
-uv pip install "git+https://github.com/byuirpytooling/pykemon.git@main"
+pip install git+https://github.com/byuirpytooling/pykemon.git
 ```
 
-### Installing the package in development into the Python environment 
-
-The `--editable` allows us to create an installation that points back to your project directory instead of copying the code into site-packages. With this, we can now edit the source files, and the installed package in the environment is automatically updated.
-
+**uv:**
 ```bash
-uv sync --editable
+uv add git+https://github.com/byuirpytooling/pykemon.git
 ```
 
-The above option replaces examples where you would run.
+---
 
-```bash
-uv pip install -e .
+## ⚡ Quick Start
+
+```python
+from pykemon.db import get_connection
+
+con = get_connection()
+pokemon = con.sql("SELECT * FROM pokemon").pl()
+pokemon
 ```
 
-## Directory structure
+---
 
-```bash
-pykemon
-├── .readthedocs.yml           ┐
-├── CHANGELOG.md               │
-├── CONDUCT.md                 │
-├── CONTRIBUTING.md            │
-├── docs                       │
-│   ├── changelog.md           │
-│   ├── conduct.md             │
-│   ├── conf.py                │ 
-│   ├── contributing.md        │ Package documentation
-│   ├── example.ipynb          │
-│   ├── index.md               │
-│   ├── make.bat               │
-│   ├── Makefile               │
-│   └── requirements.txt       │
-├── LICENSE                    │
-├── README.md                  ┘
-├── pyproject.toml             ┐ 
-├── src                        │
-│   └── pykemon     │ Package source code, metadata,
-│       ├── __init__.py        │ and build instructions 
-│       └── pycounts.py        ┘
-└── tests                      ┐
-    └── test_pycounts.py       ┘ Package tests
-```
+## 🗄️ What's in the Database?
+
+| Table | Description | Rows (approx.) |
+|---|---|---|
+| `pokemon` | Every Pokémon with base stats, types, and generation | 1,000+ |
+| `move` | Every move with type, power, accuracy, and effect | 900+ |
+| `pokemon_move` | Which Pokémon can learn which moves, and how | 100,000+ |
+| `ability` | Ability names and effects | 300+ |
+| `pokemon_ability` | Which Pokémon have which abilities | 3,000+ |
+| `item` | Item names, categories, and effects | 900+ |
+| `nature` | The 25 natures and their stat modifiers | 25 |
+| `status_effect` | Status conditions with damage and stat modifiers | 10+ |
+
+---
+
+## 📚 Documentation
+
+Full documentation, a getting started guide, and worked vignettes are available at:
+
+**[byuirpytooling.github.io/pykemon](https://byuirpytooling.github.io/pykemon)**
+
+---
+
+## 🔬 Example Analysis
+
+Looking for inspiration? Check out the [Power Creep vignette](https://byuirpytooling.github.io/pykemon/power-creep/) — a full worked example analyzing how Pokémon base stats have changed across all 9 generations.
+
+---
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.

@@ -1,32 +1,34 @@
-site_name: Example MkDocs Material Documentation for pykemon
+site_name: pykemon
 site_url: https://byuirpytooling.github.io/pykemon
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - API: API.md
+  - Vignettes:
+    - Power Creep: power-creep.md
 theme:
   name: material
   icon:
     logo: fontawesome/solid/wind
   favicon: assets/favicon.ico
-  featuers:
+  features:
     - navigation.footer
   font:
     text: Merriweather Sans
     code: Red Hat Mono
   palette:
-    # Dark Mode
     - scheme: slate
       toggle:
         icon: material/weather-sunny
-        name: Dark mode
-      primary: green
+        name: Light mode
+      primary: red
       accent: deep purple
-
-    # Light Mode
     - scheme: default
       toggle:
         icon: material/weather-night
-        name: Light mode
-      primary: blue
-      accent: deep orange
-
+        name: Dark mode
+      primary: red
+      accent: blue
 markdown_extensions:
   - attr_list
   - pymdownx.emoji:
@@ -47,7 +49,6 @@ markdown_extensions:
       alternate_style: true
   - admonition
   - pymdownx.details
-
 plugins:
   - search
   - autorefs
@@ -58,12 +59,11 @@ plugins:
           paths: [src]
           options:
             show_source: false
-
+            docstring_style: google
 extra:
   social:
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/@byuidss
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/school/byu-idaho
-
-copyright: Copyright &copy; 2026 J. Hathaway
+copyright: Copyright &copy; 2026 Team Foxcatcher

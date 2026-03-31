@@ -1,17 +1,35 @@
-# Welcome to MkDocs
+# pykemon
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+A Python package for accessing a rich Pokémon database covering all 9 generations — including base stats, moves, abilities, items, natures, and status effects.
 
-## Commands
+---
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Quick Start
 
-## Project layout
+```bash
+pip install git+https://github.com/byuirpytooling/pykemon.git
+```
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+```py
+from pykemon.db import get_connection
+
+con = get_connection()
+pokemon = con.sql("SELECT * FROM pokemon").pl()
+```
+
+---
+
+## What's Inside
+
+- **1,000+ Pokémon** across 9 generations, including regional forms and Mega Evolutions
+- **Moves, abilities, items, natures, and status effects** — all in one place
+- **DuckDB-powered** — fast SQL queries with no server required
+- **Polars-friendly** — results come back as Polars DataFrames out of the box
+
+---
+
+## Where to Go Next
+
+- [Getting Started](getting-started.md) — a full walkthrough of what you can do with the data
+- [API Reference](API.md) — full documentation of the package
+- [Power Creep Vignette](power-creep.md) — a worked example analyzing base stat trends across generations

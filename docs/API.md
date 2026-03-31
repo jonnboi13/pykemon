@@ -1,8 +1,3 @@
-# API
+# API Reference
 
-::: pykemon.template_package.multiply
-
-
-::: pykemon.add_numbers.add
-
-::: pykemon.add_numbers
+::: pykemon.db.get_connection

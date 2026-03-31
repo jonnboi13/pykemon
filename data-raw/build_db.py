@@ -26,6 +26,7 @@ def make_db(con: duckdb.DuckDBPyConnection):
             sp_atk          INTEGER,
             sp_def          INTEGER,
             speed           INTEGER,
+            generation      INTEGER,
             link            VARCHAR,
             sprite_url      VARCHAR
         )
@@ -109,8 +110,60 @@ def make_db(con: duckdb.DuckDBPyConnection):
     """)
 
 
+def get_gen_from_number(number: int) -> int:
+    if number <= 151:
+        return 1
+    elif number <= 251:
+        return 2
+    elif number <= 386:
+        return 3
+    elif number <= 493:
+        return 4
+    elif number <= 649:
+        return 5
+    elif number <= 721:
+        return 6
+    elif number <= 809:
+        return 7
+    elif number <= 905:
+        return 8
+    else:
+        return 9
+
+
 def insert_pokemon(con, df: pl.DataFrame):
     df = df.with_row_index("pokemon_id", offset=1)
+
+    form_gen_map = {
+        "Mega": 6,
+        "Alolan": 7,
+        "Galarian": 8,
+        "Hisuian": 9,
+        "Paldean": 9,
+    }
+
+    def get_form_gen(form_name):
+        if form_name is None:
+            return None
+        for key, gen in form_gen_map.items():
+            if key in form_name:
+                return gen
+        return None
+
+    df = (
+        df
+        .with_columns(
+            pl.col("number").map_elements(get_gen_from_number, return_dtype=pl.Int32).alias("generation")
+        )
+        .with_columns(
+            pl.col("form_name").map_elements(get_form_gen, return_dtype=pl.Int32).alias("form_gen")
+        )
+        .with_columns(
+            pl.coalesce(["form_gen", "generation"]).alias("generation")
+        )
+        .drop("form_gen")
+    )
+
     con.execute("""
         INSERT INTO pokemon SELECT * FROM df
     """)

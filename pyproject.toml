@@ -5,32 +5,32 @@ build-backend = "uv_build"
 [project]
 name = "pykemon"
 version = "0.0.1"
-description = "A small example package managed with uv"
+description = "A Python package for accessing a rich Pokémon database across all 9 generations."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "bs4>=0.0.2",
     "duckdb>=1.5.1",
     "requests>=2.33.0",
+    "polars>=1.39.3",
+    "pyarrow>=23.0.1",
 ]
 authors = [
-  { name = "J. Hathaway", email = "hathawayj@byui.edu" },
-  { name = "Co Author", email = "coauthor@example.com" }
+  { name = "Jonathan Oliphant", email = "oli23020@byui.edu" },
+  { name = "Mitchell Mecham", email = "mec21017@byui.edu" },
+  { name = "Caleb Peterson", email = "pet22063@byui.edu" },
+  { name = "Tucker Trost", email = "tro18011@byui.edu" },
 ]
 
-# optional, if you want to distinguish current maintainers
-maintainers = [
-  { name = "Maintainer Name", email = "maintainer@example.com" }
-]
+[project.urls]
+Documentation = "https://byuirpytooling.github.io/pykemon"
+Repository = "https://github.com/byuirpytooling/pykemon"
 
 [project.optional-dependencies]
 dev = [
     "pytest",
     "ruff",
 ]
-
-[project.scripts]
-my-uv-cli = "my_uv_package.cli:main"
 
 [tool.uv]
 
@@ -39,5 +39,3 @@ dev = [
     "polars>=1.39.3",
     "pyarrow>=23.0.1",
 ]
-# Here you can put uv-specific configuration if needed later
-# (you can leave this section out entirely for the simplest case)
