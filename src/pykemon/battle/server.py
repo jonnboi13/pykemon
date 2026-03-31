@@ -21,43 +21,45 @@ DEFAULT_PORT = 5555
 
 # ── Serialization helpers ─────────────────────────────────────────────────────
 
+
 def _pokemon_to_dict(p: Pokemon) -> dict:
     return {
-        "name":           p.name,
-        "primary_type":   p.primary_type,
+        "name": p.name,
+        "primary_type": p.primary_type,
         "secondary_type": p.secondary_type,
-        "current_hp":     p.current_hp,
-        "max_hp":         p.max_hp,
-        "is_fainted":     p.is_fainted,
-        "level":          p.level,
-        "nature":         p.nature,
-        "status":         None,
+        "current_hp": p.current_hp,
+        "max_hp": p.max_hp,
+        "is_fainted": p.is_fainted,
+        "level": p.level,
+        "nature": p.nature,
+        "status": None,
     }
 
 
 def _roster_entry(p: Pokemon) -> dict:
     return {
-        "name":       p.name,
+        "name": p.name,
         "current_hp": p.current_hp,
-        "max_hp":     p.max_hp,
+        "max_hp": p.max_hp,
         "is_fainted": p.is_fainted,
     }
 
 
 def _moveslot_to_dict(slot_index: int, ms: MoveSlot) -> dict:
     return {
-        "slot":       slot_index,
-        "move_name":  ms.move.move_name,
-        "type":       ms.move.type,
-        "category":   ms.move.category,
-        "power":      ms.move.power,
-        "accuracy":   ms.move.accuracy,
+        "slot": slot_index,
+        "move_name": ms.move.move_name,
+        "type": ms.move.type,
+        "category": ms.move.category,
+        "power": ms.move.power,
+        "accuracy": ms.move.accuracy,
         "current_pp": ms.current_pp,
-        "max_pp":     ms.move.pp,
+        "max_pp": ms.move.pp,
     }
 
 
 # ── Battle server ─────────────────────────────────────────────────────────────
+
 
 class BattleServer:
     def __init__(self, port: int = DEFAULT_PORT) -> None:
@@ -100,13 +102,31 @@ class BattleServer:
         print("  Both players connected. Starting battle!\n")
 
     def _init_battle(self) -> None:
-        print("  Loading battle data...")
-        t1, t2, poke_moves = load_default_teams()
+        from .default_teams import load_team_from_db
+
+        # Ask each player which team they want
+        teams = self._get_team_list()
+        team_display = [list(t) for t in teams]
+
+        send(self.sock1, {"type": "choose_team", "teams": team_display})
+        send(self.sock2, {"type": "choose_team", "teams": team_display})
+
+        msg1 = recv(self.sock1)
+        msg2 = recv(self.sock2)
+
+        team1_id = teams[msg1["index"]][0]
+        team2_id = teams[msg2["index"]][0]
+
+        t1, moves1, next_id = load_team_from_db(team1_id, trainer_name="Player 1")
+        t2, moves2, _ = load_team_from_db(
+            team2_id, trainer_name="Player 2", next_id_start=next_id
+        )
+
         self.trainer1 = t1
         self.trainer2 = t2
 
-        # Initialize persistent MoveSlot state for all 12 Pokemon
-        for tid, moves in poke_moves.items():
+        all_moves = {**moves1, **moves2}
+        for tid, moves in all_moves.items():
             self.move_slots[tid] = [MoveSlot(move=m, current_pp=m.pp) for m in moves]
 
         self.field = Field(
@@ -117,6 +137,16 @@ class BattleServer:
         )
         print(f"  {t1.name}'s team: {', '.join(p.name for p in t1.roster)}")
         print(f"  {t2.name}'s team: {', '.join(p.name for p in t2.roster)}\n")
+
+    def _get_team_list(self) -> list[tuple]:
+        from ..db import get_connection
+
+        con = get_connection()
+        teams = con.execute(
+            "SELECT team_id, team_name FROM team ORDER BY team_id"
+        ).fetchall()
+        con.close()
+        return teams
 
     def _battle_loop(self) -> None:
         self.events = []
@@ -198,13 +228,13 @@ class BattleServer:
         if side == 1:
             attacker = f.active_t1
             defender = f.active_t2
-            slots    = f.moves_t1
+            slots = f.moves_t1
             def_trainer = self.trainer2
             def_side = 2
         else:
             attacker = f.active_t2
             defender = f.active_t1
-            slots    = f.moves_t2
+            slots = f.moves_t2
             def_trainer = self.trainer1
             def_side = 1
 
@@ -218,7 +248,9 @@ class BattleServer:
 
         # Announce move
         if move.category == "Status":
-            self.events.append(f"{trainer.name}'s {attacker.name} used {move.move_name}!")
+            self.events.append(
+                f"{trainer.name}'s {attacker.name} used {move.move_name}!"
+            )
             return  # Status moves have no mechanical effect in v1
 
         pwr_str = f"{move.power} power" if move.power else "??"
@@ -230,7 +262,9 @@ class BattleServer:
 
         # Accuracy check
         if not accuracy_check(move):
-            self.events.append(f"{trainer.name}'s {attacker.name}'s {move.move_name} missed!")
+            self.events.append(
+                f"{trainer.name}'s {attacker.name}'s {move.move_name} missed!"
+            )
             return
 
         # Damage calculation
@@ -281,11 +315,14 @@ class BattleServer:
 
         # Send force-switch directly to the affected client
         target_sock = self.sock1 if side == 1 else self.sock2
-        send(target_sock, {
-            "type":      "force_switch",
-            "reason":    "fainted",
-            "available": available,
-        })
+        send(
+            target_sock,
+            {
+                "type": "force_switch",
+                "reason": "fainted",
+                "available": available,
+            },
+        )
 
         try:
             switch_action = recv(target_sock)
@@ -298,27 +335,27 @@ class BattleServer:
 
     def _build_full_state(self, perspective: int, awaiting: str) -> dict:
         if perspective == 1:
-            you, opp     = self.trainer1, self.trainer2
-            your_active  = self.field.active_t1
-            opp_active   = self.field.active_t2
-            your_moves   = self.field.moves_t1
+            you, opp = self.trainer1, self.trainer2
+            your_active = self.field.active_t1
+            opp_active = self.field.active_t2
+            your_moves = self.field.moves_t1
         else:
-            you, opp     = self.trainer2, self.trainer1
-            your_active  = self.field.active_t2
-            opp_active   = self.field.active_t1
-            your_moves   = self.field.moves_t2
+            you, opp = self.trainer2, self.trainer1
+            your_active = self.field.active_t2
+            opp_active = self.field.active_t1
+            your_moves = self.field.moves_t2
 
         return {
-            "type":              "full_state",
-            "turn":              self.turn,
-            "your_trainer":      you.name,
-            "opponent_trainer":  opp.name,
-            "your_active":       _pokemon_to_dict(your_active),
-            "opponent_active":   _pokemon_to_dict(opp_active),
-            "your_moves":        [_moveslot_to_dict(i, ms) for i, ms in enumerate(your_moves)],
-            "your_roster":       [_roster_entry(p) for p in you.roster],
-            "events":            list(self.events),
-            "awaiting":          awaiting,
+            "type": "full_state",
+            "turn": self.turn,
+            "your_trainer": you.name,
+            "opponent_trainer": opp.name,
+            "your_active": _pokemon_to_dict(your_active),
+            "opponent_active": _pokemon_to_dict(opp_active),
+            "your_moves": [_moveslot_to_dict(i, ms) for i, ms in enumerate(your_moves)],
+            "your_roster": [_roster_entry(p) for p in you.roster],
+            "events": list(self.events),
+            "awaiting": awaiting,
         }
 
     def _broadcast_full_state(self, awaiting: str) -> None:
@@ -327,6 +364,7 @@ class BattleServer:
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
+
 
 def run_host(port: int = DEFAULT_PORT) -> None:
     """Start the battle server and run a full battle."""

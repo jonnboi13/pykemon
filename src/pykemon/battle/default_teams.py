@@ -22,38 +22,62 @@ _TEAM_RED: dict = {
     "team_name": "Team Red",
     "pokemon": [
         {
-            "name": "Charizard", "nature": "Timid", "ability": "Blaze", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Charizard",
+            "nature": "Timid",
+            "ability": "Blaze",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"sp_atk": 252, "speed": 252, "hp": 4},
             "moves": ["Flamethrower", "Dragon Claw", "Air Slash", "Fire Blast"],
         },
         {
-            "name": "Blastoise", "nature": "Modest", "ability": "Torrent", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Blastoise",
+            "nature": "Modest",
+            "ability": "Torrent",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"sp_atk": 252, "speed": 252, "hp": 4},
             "moves": ["Surf", "Ice Beam", "Hydro Pump", "Aura Sphere"],
         },
         {
-            "name": "Venusaur", "nature": "Bold", "ability": "Overgrow", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Venusaur",
+            "nature": "Bold",
+            "ability": "Overgrow",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"hp": 252, "defense": 252, "sp_atk": 4},
             "moves": ["Energy Ball", "Sludge Bomb", "Solar Beam", "Giga Drain"],
         },
         {
-            "name": "Pikachu", "nature": "Hasty", "ability": "Static", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Pikachu",
+            "nature": "Hasty",
+            "ability": "Static",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"sp_atk": 252, "speed": 252, "hp": 4},
             "moves": ["Thunderbolt", "Volt Tackle", "Wild Charge", "Surf"],
         },
         {
-            "name": "Snorlax", "nature": "Careful", "ability": "Thick Fat", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Snorlax",
+            "nature": "Careful",
+            "ability": "Thick Fat",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"hp": 252, "sp_def": 252, "attack": 4},
             "moves": ["Body Slam", "Ice Beam", "Skull Bash", "Double-Edge"],
         },
         {
-            "name": "Gengar", "nature": "Timid", "ability": "Cursed Body", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Gengar",
+            "nature": "Timid",
+            "ability": "Cursed Body",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"sp_atk": 252, "speed": 252, "hp": 4},
             "moves": ["Shadow Ball", "Sludge Bomb", "Psychic", "Dark Pulse"],
         },
@@ -65,38 +89,62 @@ _TEAM_BLUE: dict = {
     "team_name": "Team Blue",
     "pokemon": [
         {
-            "name": "Arcanine", "nature": "Adamant", "ability": "Intimidate", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Arcanine",
+            "nature": "Adamant",
+            "ability": "Intimidate",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"attack": 252, "speed": 252, "hp": 4},
             "moves": ["Flare Blitz", "Outrage", "Close Combat", "Overheat"],
         },
         {
-            "name": "Lapras", "nature": "Modest", "ability": "Water Absorb", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Lapras",
+            "nature": "Modest",
+            "ability": "Water Absorb",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"hp": 252, "sp_atk": 252, "sp_def": 4},
             "moves": ["Hydro Pump", "Blizzard", "Ice Beam", "Surf"],
         },
         {
-            "name": "Alakazam", "nature": "Timid", "ability": "Magic Guard", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Alakazam",
+            "nature": "Timid",
+            "ability": "Magic Guard",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"sp_atk": 252, "speed": 252, "hp": 4},
             "moves": ["Psychic", "Shadow Ball", "Focus Blast", "Future Sight"],
         },
         {
-            "name": "Machamp", "nature": "Adamant", "ability": "No Guard", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Machamp",
+            "nature": "Adamant",
+            "ability": "No Guard",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"attack": 252, "hp": 252, "defense": 4},
             "moves": ["Close Combat", "Earthquake", "Superpower", "Focus Punch"],
         },
         {
-            "name": "Dragonite", "nature": "Adamant", "ability": "Multiscale", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Dragonite",
+            "nature": "Adamant",
+            "ability": "Multiscale",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"attack": 252, "speed": 252, "hp": 4},
             "moves": ["Outrage", "Dragon Rush", "Fly", "Hurricane"],
         },
         {
-            "name": "Jolteon", "nature": "Timid", "ability": "Volt Absorb", "item": None,
-            "level": 100, "ivs": 31,
+            "name": "Jolteon",
+            "nature": "Timid",
+            "ability": "Volt Absorb",
+            "item": None,
+            "level": 100,
+            "ivs": 31,
             "evs": {"sp_atk": 252, "speed": 252, "hp": 4},
             "moves": ["Thunderbolt", "Thunder", "Shadow Ball", "Wild Charge"],
         },
@@ -128,6 +176,7 @@ def _nature_mods(stat_up: str | None, stat_down: str | None) -> dict[str, float]
 
 # ── Team loading ──────────────────────────────────────────────────────────────
 
+
 def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
     """
     Build both default Trainer objects from a single DB pass.
@@ -138,8 +187,8 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
     """
     all_configs = _TEAM_RED["pokemon"] + _TEAM_BLUE["pokemon"]
 
-    all_poke_names   = list({p["name"]   for p in all_configs})
-    all_move_names   = list({m for p in all_configs for m in p["moves"]})
+    all_poke_names = list({p["name"] for p in all_configs})
+    all_move_names = list({m for p in all_configs for m in p["moves"]})
     all_nature_names = list({p["nature"] for p in all_configs})
 
     con = get_connection()
@@ -179,8 +228,8 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
     con.close()
 
     # Build lookup dicts
-    poke_by_name   = {r[0]: r for r in poke_rows}
-    move_by_name   = {r[1]: r for r in move_rows}
+    poke_by_name = {r[0]: r for r in poke_rows}
+    move_by_name = {r[1]: r for r in move_rows}
     nature_by_name = {r[0]: r for r in nature_rows}
 
     pokemon_moves: dict[int, list[Move]] = {}
@@ -195,7 +244,17 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
             if prow is None:
                 raise ValueError(f"Pokemon '{cfg['name']}' not found in DB.")
 
-            _, primary_type, secondary_type, base_hp, base_atk, base_def, base_spa, base_spd, base_spe = prow
+            (
+                _,
+                primary_type,
+                secondary_type,
+                base_hp,
+                base_atk,
+                base_def,
+                base_spa,
+                base_spd,
+                base_spe,
+            ) = prow
 
             nrow = nature_by_name.get(cfg["nature"])
             if nrow is None:
@@ -203,8 +262,8 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
             _, stat_up, stat_down = nrow
             mods = _nature_mods(stat_up, stat_down)
 
-            ivs = cfg["ivs"]   # single int: all stats use this value
-            evs = cfg["evs"]   # dict of stat_name -> ev_value (missing = 0)
+            ivs = cfg["ivs"]  # single int: all stats use this value
+            evs = cfg["evs"]  # dict of stat_name -> ev_value (missing = 0)
             level = cfg["level"]
 
             max_hp = _compute_hp(base_hp, ivs, evs.get("hp", 0), level)
@@ -215,11 +274,21 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
                 primary_type=primary_type,
                 secondary_type=secondary_type,
                 max_hp=max_hp,
-                attack=_compute_stat(base_atk, ivs, evs.get("attack",  0), level, mods["attack"]),
-                defense=_compute_stat(base_def, ivs, evs.get("defense", 0), level, mods["defense"]),
-                sp_atk=_compute_stat(base_spa, ivs, evs.get("sp_atk",  0), level, mods["sp_atk"]),
-                sp_def=_compute_stat(base_spd, ivs, evs.get("sp_def",  0), level, mods["sp_def"]),
-                speed=_compute_stat(base_spe, ivs, evs.get("speed",   0), level, mods["speed"]),
+                attack=_compute_stat(
+                    base_atk, ivs, evs.get("attack", 0), level, mods["attack"]
+                ),
+                defense=_compute_stat(
+                    base_def, ivs, evs.get("defense", 0), level, mods["defense"]
+                ),
+                sp_atk=_compute_stat(
+                    base_spa, ivs, evs.get("sp_atk", 0), level, mods["sp_atk"]
+                ),
+                sp_def=_compute_stat(
+                    base_spd, ivs, evs.get("sp_def", 0), level, mods["sp_def"]
+                ),
+                speed=_compute_stat(
+                    base_spe, ivs, evs.get("speed", 0), level, mods["speed"]
+                ),
                 current_hp=max_hp,
                 level=level,
                 nature=cfg["nature"],
@@ -234,16 +303,18 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
                     print(f"  WARNING: move '{move_name}' not found in DB — skipping.")
                     continue
                 move_id, mn_str, mtype, category, power, accuracy, pp, effect = mrow
-                moves.append(Move(
-                    move_id=move_id,
-                    move_name=mn_str,
-                    type=mtype,
-                    category=category,
-                    power=power,
-                    accuracy=accuracy,
-                    pp=pp,
-                    effect=effect or "",
-                ))
+                moves.append(
+                    Move(
+                        move_id=move_id,
+                        move_name=mn_str,
+                        type=mtype,
+                        category=category,
+                        power=power,
+                        accuracy=accuracy,
+                        pp=pp,
+                        effect=effect or "",
+                    )
+                )
 
             pokemon_moves[next_id] = moves
             roster.append(pokemon)
@@ -255,7 +326,126 @@ def load_default_teams() -> tuple[Trainer, Trainer, dict[int, list[Move]]]:
             roster=roster,
         )
 
-    trainer_red  = _build_trainer(_TEAM_RED)
+    trainer_red = _build_trainer(_TEAM_RED)
     trainer_blue = _build_trainer(_TEAM_BLUE)
 
     return trainer_red, trainer_blue, pokemon_moves
+
+
+def load_team_from_db(
+    team_id: int, trainer_name: str, next_id_start: int = 1
+) -> tuple[Trainer, dict[int, list[Move]], int]:
+    """
+    Load a Trainer from the team/team_pokemon/team_pokemon_move tables.
+    Returns (trainer, pokemon_moves dict, next available id).
+    """
+    con = get_connection()
+
+    team_row = con.execute(
+        "SELECT team_name FROM team WHERE team_id = ?", [team_id]
+    ).fetchone()
+    if team_row is None:
+        raise ValueError(f"team_id {team_id} not found.")
+
+    tp_rows = con.execute(
+        """
+        SELECT tp.team_pokemon_id, p.name, p.primary_type, p.secondary_type,
+               p.hp, p.attack, p.defense, p.sp_atk, p.sp_def, p.speed,
+               n.name, n.stat_up, n.stat_down,
+               tp.health_IV, tp.attack_IV, tp.defense_IV,
+               tp.sp_atk_IV, tp.sp_def_IV, tp.speed_IV,
+               tp.health_EV, tp.attack_EV, tp.defense_EV,
+               tp.sp_atk_EV, tp.sp_def_EV, tp.speed_EV,
+               tp.level,
+               COALESCE(a.ability_name, 'None')
+        FROM   team_pokemon tp
+        JOIN   pokemon p  ON tp.pokemon_id  = p.pokemon_id
+        JOIN   nature  n  ON tp.nature_id   = n.nature_id
+        LEFT JOIN ability a ON tp.ability_id = a.ability_id
+        WHERE  tp.team_id = ?
+        ORDER  BY tp.team_pokemon_id
+    """,
+        [team_id],
+    ).fetchall()
+
+    pokemon_moves: dict[int, list[Move]] = {}
+    roster: list[Pokemon] = []
+    next_id = next_id_start
+
+    for row in tp_rows:
+        (
+            _,
+            pname,
+            ptype1,
+            ptype2,
+            base_hp,
+            base_atk,
+            base_def,
+            base_spa,
+            base_spd,
+            base_spe,
+            nature_name,
+            stat_up,
+            stat_down,
+            iv_hp,
+            iv_atk,
+            iv_def,
+            iv_spa,
+            iv_spd,
+            iv_spe,
+            ev_hp,
+            ev_atk,
+            ev_def,
+            ev_spa,
+            ev_spd,
+            ev_spe,
+            level,
+            ability_name,
+        ) = row
+
+        mods = _nature_mods(stat_up, stat_down)
+
+        pokemon = Pokemon(
+            team_pokemon_id=next_id,
+            name=pname,
+            primary_type=ptype1,
+            secondary_type=ptype2,
+            max_hp=_compute_hp(base_hp, iv_hp, ev_hp, level),
+            attack=_compute_stat(base_atk, iv_atk, ev_atk, level, mods["attack"]),
+            defense=_compute_stat(base_def, iv_def, ev_def, level, mods["defense"]),
+            sp_atk=_compute_stat(base_spa, iv_spa, ev_spa, level, mods["sp_atk"]),
+            sp_def=_compute_stat(base_spd, iv_spd, ev_spd, level, mods["sp_def"]),
+            speed=_compute_stat(base_spe, iv_spe, ev_spe, level, mods["speed"]),
+            current_hp=_compute_hp(base_hp, iv_hp, ev_hp, level),
+            level=level,
+            nature=nature_name,
+            ability=ability_name,
+        )
+
+        move_rows = con.execute(
+            """
+            SELECT m.move_id, m.move_name, m.type, m.category,
+                   m.power, m.accuracy, m.pp, COALESCE(m.effect, '')
+            FROM   team_pokemon_move tpm
+            JOIN   move m ON tpm.move_id = m.move_id
+            WHERE  tpm.team_pokemon_id = ?
+            ORDER  BY tpm.team_pokemon_move_id
+        """,
+            [row[0]],
+        ).fetchall()  # row[0] is the real team_pokemon_id from DB
+
+        moves = [
+            Move(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]) for r in move_rows
+        ]
+        pokemon_moves[next_id] = moves
+        roster.append(pokemon)
+        next_id += 1
+
+    con.close()
+
+    trainer = Trainer(
+        name=trainer_name,
+        team_name=team_row[0],
+        roster=roster,
+    )
+    return trainer, pokemon_moves, next_id

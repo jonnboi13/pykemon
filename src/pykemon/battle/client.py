@@ -15,6 +15,7 @@ from .server import DEFAULT_PORT
 
 # ── Display helpers ───────────────────────────────────────────────────────────
 
+
 def _hp_bar(current: int, maximum: int, width: int = 24) -> str:
     ratio = max(0.0, current / maximum) if maximum else 0.0
     filled = round(ratio * width)
@@ -29,15 +30,17 @@ def _clear() -> None:
 def _render_full_state(state: dict) -> None:
     print("\n" + "=" * 60)
     turn = state["turn"]
-    you  = state["your_trainer"]
-    opp  = state["opponent_trainer"]
+    you = state["your_trainer"]
+    opp = state["opponent_trainer"]
     print(f"{'─' * 60}")
     print(f"  Turn {turn}  |  {you} vs {opp}")
     print(f"{'─' * 60}\n")
 
     # Opponent's active (top)
     oa = state["opponent_active"]
-    oa_types = oa["primary_type"] + (f"/{oa['secondary_type']}" if oa["secondary_type"] else "")
+    oa_types = oa["primary_type"] + (
+        f"/{oa['secondary_type']}" if oa["secondary_type"] else ""
+    )
     print(f"  OPP  {oa['name']:<18}  {_hp_bar(oa['current_hp'], oa['max_hp'])}")
     print(f"       Lv.{oa['level']}  {oa['nature']}  [{oa_types}]")
     if oa["is_fainted"]:
@@ -46,7 +49,9 @@ def _render_full_state(state: dict) -> None:
 
     # Your active (bottom)
     ya = state["your_active"]
-    ya_types = ya["primary_type"] + (f"/{ya['secondary_type']}" if ya["secondary_type"] else "")
+    ya_types = ya["primary_type"] + (
+        f"/{ya['secondary_type']}" if ya["secondary_type"] else ""
+    )
     print(f"  YOU  {ya['name']:<18}  {_hp_bar(ya['current_hp'], ya['max_hp'])}")
     print(f"       Lv.{ya['level']}  {ya['nature']}  [{ya_types}]")
     if ya["is_fainted"]:
@@ -78,7 +83,7 @@ def _render_full_state(state: dict) -> None:
         for m in state["your_moves"]:
             pwr = f"Pwr {m['power']:>3}" if m["power"] is not None else "Status  "
             acc = f"Acc {m['accuracy']:>3}" if m["accuracy"] is not None else "Acc ---"
-            pp  = f"PP {m['current_pp']:>2}/{m['max_pp']}"
+            pp = f"PP {m['current_pp']:>2}/{m['max_pp']}"
             print(
                 f"    {m['slot'] + 1}. {m['move_name']:<22}"
                 f"  [{m['type']:>10}]  {pwr}  {acc}  {pp}"
@@ -99,14 +104,16 @@ def _render_force_switch(state: dict, available: list[int]) -> None:
 
 # ── Action prompts ────────────────────────────────────────────────────────────
 
+
 def _prompt_action(state: dict) -> dict:
     """Prompt the player to choose a move or switch."""
     n_moves = len(state.get("your_moves", []))
-    roster  = state["your_roster"]
+    roster = state["your_roster"]
     active_name = state["your_active"]["name"]
 
     available_switches = [
-        i for i, p in enumerate(roster)
+        i
+        for i, p in enumerate(roster)
         if not p["is_fainted"] and p["name"] != active_name
     ]
 
@@ -131,8 +138,10 @@ def _prompt_action(state: dict) -> dict:
             if idx in available_switches:
                 return {"type": "switch", "roster_index": idx}
 
-        print(f"  Invalid. Enter 1–{n_moves} for a move" +
-              (f", or s<n> to switch." if available_switches else "."))
+        print(
+            f"  Invalid. Enter 1–{n_moves} for a move"
+            + (f", or s<n> to switch." if available_switches else ".")
+        )
 
 
 def _prompt_force_switch(available: list[int], roster: list[dict]) -> dict:
@@ -155,12 +164,33 @@ def _prompt_force_switch(available: list[int], roster: list[dict]) -> dict:
 
 # ── Main client loop ──────────────────────────────────────────────────────────
 
+
 def run_client(host_ip: str, port: int = DEFAULT_PORT) -> None:
     """Connect to the battle server and play the full battle."""
     print(f"\n  Connecting to {host_ip}:{port}...")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host_ip, port))
     print("  Connected! Waiting for battle to start...\n")
+
+    # ── Team selection ─────────────────────────────────────────────────────────
+    msg = recv(sock)  # choose_team
+    teams = msg["teams"]
+    print("\n  Available Teams:")
+    print("  " + "─" * 30)
+    for i, (_, name) in enumerate(teams):
+        print(f"  {i + 1:2}. {name}")
+    print("  " + "─" * 30)
+
+    while True:
+        try:
+            idx = int(input("  Pick your team (number): ")) - 1
+            if 0 <= idx < len(teams):
+                break
+        except (ValueError, EOFError):
+            pass
+        print(f"  Enter a number from 1 to {len(teams)}.")
+
+    send(sock, {"index": idx})
 
     # Keep a reference to the last full_state so we can show roster on force-switch
     last_state: dict | None = None

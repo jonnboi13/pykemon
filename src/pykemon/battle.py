@@ -16,14 +16,15 @@ LEVEL = 50
 
 # ── Data classes ──────────────────────────────────────────────────────────────
 
+
 @dataclass
 class Move:
     move_id: int
     name: str
     type: str
-    category: str   # 'Physical' | 'Special'
+    category: str  # 'Physical' | 'Special'
     power: int
-    accuracy: int   # 1-100
+    accuracy: int  # 1-100
 
 
 @dataclass
@@ -54,6 +55,7 @@ class BattlePokemon:
 
 # ── Stat scaling ──────────────────────────────────────────────────────────────
 
+
 def _scale_stat(base: int, is_hp: bool = False) -> int:
     """Scale a base stat to level LEVEL (Gen 3+ formula, no EVs/IVs)."""
     if is_hp:
@@ -63,47 +65,103 @@ def _scale_stat(base: int, is_hp: bool = False) -> int:
 
 # ── Database loading ──────────────────────────────────────────────────────────
 
-def load_pokemon(pokemon_id: int) -> BattlePokemon:
-    """Load a BattlePokemon from the DB at level 50 with its top-4 damaging moves."""
+# def load_pokemon(pokemon_id: int) -> BattlePokemon:
+#     """Load a BattlePokemon from the DB at level 50 with its top-4 damaging moves."""
+#     con = get_connection()
+
+#     row = con.execute(
+#         """
+#         SELECT pokemon_id, name, primary_type, secondary_type,
+#                hp, attack, defense, sp_atk, sp_def, speed
+#         FROM   pokemon
+#         WHERE  pokemon_id = ?
+#         """,
+#         [pokemon_id],
+#     ).fetchone()
+
+#     if row is None:
+#         con.close()
+#         raise ValueError(f"Pokemon ID {pokemon_id} not found in database.")
+
+#     move_rows = con.execute(
+#         """
+#         SELECT DISTINCT
+#                m.move_id,
+#                m.move_name,
+#                m.type,
+#                m.category,
+#                COALESCE(m.power, 0)   AS power,
+#                COALESCE(m.accuracy, 100) AS accuracy
+#         FROM   pokemon_move pm
+#         JOIN   move m ON pm.move_id = m.move_id
+#         WHERE  pm.pokemon_id = ?
+#           AND  m.category IN ('Physical', 'Special')
+#           AND  m.power > 0
+#         ORDER  BY m.power DESC
+#         LIMIT  4
+#         """,
+#         [pokemon_id],
+#     ).fetchall()
+
+#     con.close()
+
+#     moves = [Move(r[0], r[1], r[2], r[3], r[4], r[5] or 100) for r in move_rows]
+#     max_hp = _scale_stat(row[4], is_hp=True)
+
+#     return BattlePokemon(
+#         pokemon_id=row[0],
+#         name=row[1],
+#         primary_type=row[2],
+#         secondary_type=row[3],
+#         max_hp=max_hp,
+#         current_hp=max_hp,
+#         attack=_scale_stat(row[5]),
+#         defense=_scale_stat(row[6]),
+#         sp_atk=_scale_stat(row[7]),
+#         sp_def=_scale_stat(row[8]),
+#         speed=_scale_stat(row[9]),
+#         moves=moves,
+#     )
+
+
+def load_team_pokemon(team_pokemon_id: int) -> BattlePokemon:
+    """
+    Load a BattlePokemon from a team_pokemon record, using the moves
+    assigned in team_pokemon_move rather than auto-selecting top-4.
+    """
     con = get_connection()
 
     row = con.execute(
         """
-        SELECT pokemon_id, name, primary_type, secondary_type,
-               hp, attack, defense, sp_atk, sp_def, speed
-        FROM   pokemon
-        WHERE  pokemon_id = ?
-        """,
-        [pokemon_id],
+        SELECT p.pokemon_id, p.name, p.primary_type, p.secondary_type,
+               p.hp, p.attack, p.defense, p.sp_atk, p.sp_def, p.speed
+        FROM team_pokemon tp
+        JOIN pokemon p ON tp.pokemon_id = p.pokemon_id
+        WHERE tp.team_pokemon_id = ?
+    """,
+        [team_pokemon_id],
     ).fetchone()
 
     if row is None:
         con.close()
-        raise ValueError(f"Pokemon ID {pokemon_id} not found in database.")
+        raise ValueError(f"team_pokemon_id {team_pokemon_id} not found.")
 
     move_rows = con.execute(
         """
-        SELECT DISTINCT
-               m.move_id,
-               m.move_name,
-               m.type,
-               m.category,
-               COALESCE(m.power, 0)   AS power,
-               COALESCE(m.accuracy, 100) AS accuracy
-        FROM   pokemon_move pm
-        JOIN   move m ON pm.move_id = m.move_id
-        WHERE  pm.pokemon_id = ?
-          AND  m.category IN ('Physical', 'Special')
-          AND  m.power > 0
-        ORDER  BY m.power DESC
-        LIMIT  4
-        """,
-        [pokemon_id],
+        SELECT m.move_id, m.move_name, m.type, m.category,
+               COALESCE(m.power, 0)        AS power,
+               COALESCE(m.accuracy, 100)   AS accuracy
+        FROM team_pokemon_move tpm
+        JOIN move m ON tpm.move_id = m.move_id
+        WHERE tpm.team_pokemon_id = ?
+        ORDER BY tpm.team_pokemon_move_id
+    """,
+        [team_pokemon_id],
     ).fetchall()
 
     con.close()
 
-    moves = [Move(r[0], r[1], r[2], r[3], r[4], r[5] or 100) for r in move_rows]
+    moves = [Move(r[0], r[1], r[2], r[3], r[4], r[5]) for r in move_rows]
     max_hp = _scale_stat(row[4], is_hp=True)
 
     return BattlePokemon(
@@ -122,11 +180,52 @@ def load_pokemon(pokemon_id: int) -> BattlePokemon:
     )
 
 
+def load_team(team_id: int) -> list[BattlePokemon]:
+    """
+    Load all BattlePokemon for a given team_id, in roster order.
+    Returns a list of up to 6 BattlePokemon.
+    """
+    con = get_connection()
+    team_pokemon_ids = con.execute(
+        """
+        SELECT team_pokemon_id
+        FROM team_pokemon
+        WHERE team_id = ?
+        ORDER BY team_pokemon_id
+    """,
+        [team_id],
+    ).fetchall()
+    con.close()
+
+    if not team_pokemon_ids:
+        raise ValueError(f"No Pokemon found for team_id {team_id}.")
+
+    return [load_team_pokemon(row[0]) for row in team_pokemon_ids]
+
+
 # ── Curated roster ────────────────────────────────────────────────────────────
 
 _ROSTER_NUMBERS = [
-    1, 4, 7, 25, 52, 54, 58, 63, 66,
-    79, 94, 113, 131, 133, 143, 147, 152, 155, 158, 196,
+    1,
+    4,
+    7,
+    25,
+    52,
+    54,
+    58,
+    63,
+    66,
+    79,
+    94,
+    113,
+    131,
+    133,
+    143,
+    147,
+    152,
+    155,
+    158,
+    196,
 ]
 
 
@@ -150,7 +249,10 @@ def get_pokemon_list() -> list:
 
 # ── Battle mechanics ──────────────────────────────────────────────────────────
 
-def calculate_damage(attacker: BattlePokemon, move: Move, defender: BattlePokemon) -> int:
+
+def calculate_damage(
+    attacker: BattlePokemon, move: Move, defender: BattlePokemon
+) -> int:
     """
     Return damage dealt, or -1 if the move missed.
     Uses a simplified Gen 4 damage formula (no type chart, no crits for MVP).
@@ -188,11 +290,11 @@ def resolve_turn(
     if host.speed >= opp.speed:
         order = [
             ("host", host, host_move, "opp", opp),
-            ("opp",  opp,  opp_move,  "host", host),
+            ("opp", opp, opp_move, "host", host),
         ]
     else:
         order = [
-            ("opp",  opp,  opp_move,  "host", host),
+            ("opp", opp, opp_move, "host", host),
             ("host", host, host_move, "opp", opp),
         ]
 
@@ -208,13 +310,15 @@ def resolve_turn(
             if defender.is_fainted:
                 fainted_side = def_side
 
-        events.append({
-            "attacker_side": att_side,
-            "move":          move.name,
-            "missed":        dmg == -1,
-            "damage":        max(0, dmg),
-            "fainted_side":  fainted_side,
-        })
+        events.append(
+            {
+                "attacker_side": att_side,
+                "move": move.name,
+                "missed": dmg == -1,
+                "damage": max(0, dmg),
+                "fainted_side": fainted_side,
+            }
+        )
 
     return events
 

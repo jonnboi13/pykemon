@@ -7,58 +7,84 @@ Call team_editor() to launch the interactive terminal app.
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "data-raw"))
+sys.path.append(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "data-raw"
+    )
+)
 
 import duckdb
-from build_db import make_db
 from pykemon.CRUD.team import insert_team
 from pykemon.CRUD.team_pokemon import insert_team_pokemon
 from pykemon.CRUD.team_pokemon_move import insert_team_pokemon_move
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "src", "pykemon", "data", "pykemon.duckdb")
+DB_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "..",
+    "..",
+    "..",
+    "src",
+    "pykemon",
+    "data",
+    "pykemon.duckdb",
+)
 
 
 # ---------------------------------------------------------------------------
 # DB helpers
 # ---------------------------------------------------------------------------
 
+
 def get_teams(con):
     return con.execute("SELECT team_id, team_name FROM team").fetchall()
 
 
 def get_team_pokemon(con, team_id):
-    return con.execute("""
+    return con.execute(
+        """
         SELECT tp.team_pokemon_id, TRIM(p.name, '"') AS name, tp.pokemon_id
         FROM team_pokemon tp
         JOIN pokemon p ON tp.pokemon_id = p.pokemon_id
         WHERE tp.team_id = ?
-    """, (team_id,)).fetchall()
+    """,
+        (team_id,),
+    ).fetchall()
 
 
 def get_pokemon_moves(con, team_pokemon_id):
-    return con.execute("""
+    return con.execute(
+        """
         SELECT tpm.team_pokemon_move_id, m.move_name, tpm.move_id
         FROM team_pokemon_move tpm
         JOIN move m ON tpm.move_id = m.move_id
         WHERE tpm.team_pokemon_id = ?
-    """, (team_pokemon_id,)).fetchall()
+    """,
+        (team_pokemon_id,),
+    ).fetchall()
 
 
 def get_abilities_for_pokemon(con, pokemon_id):
-    return con.execute("""
+    return con.execute(
+        """
         SELECT a.ability_id, a.ability_name
         FROM pokemon_ability pa
         JOIN ability a ON pa.ability_id = a.ability_id
         WHERE pa.pokemon_id = ?
-    """, (pokemon_id,)).fetchall()
+    """,
+        (pokemon_id,),
+    ).fetchall()
 
 
 def get_all_natures(con):
-    return con.execute("SELECT nature_id, name, stat_up, stat_down FROM nature ORDER BY nature_id").fetchall()
+    return con.execute(
+        "SELECT nature_id, name, stat_up, stat_down FROM nature ORDER BY nature_id"
+    ).fetchall()
+
 
 def get_pokemon_stats_with_nature(con, team_pokemon_id):
     """Return base stats modified by the pokemon's nature."""
-    result = con.execute("""
+    result = con.execute(
+        """
         SELECT 
             p.hp, p.attack, p.defense, p.sp_atk, p.sp_def, p.speed,
             n.stat_up, n.stat_down
@@ -66,25 +92,27 @@ def get_pokemon_stats_with_nature(con, team_pokemon_id):
         JOIN pokemon p ON tp.pokemon_id = p.pokemon_id
         JOIN nature n ON tp.nature_id = n.nature_id
         WHERE tp.team_pokemon_id = ?
-    """, (team_pokemon_id,)).fetchone()
+    """,
+        (team_pokemon_id,),
+    ).fetchone()
 
     hp, attack, defense, sp_atk, sp_def, speed, stat_up, stat_down = result
 
     stat_map = {
-        "Attack":   "attack",
-        "Defense":  "defense",
-        "Sp. Atk":  "sp_atk",
-        "Sp. Def":  "sp_def",
-        "Speed":    "speed",
+        "Attack": "attack",
+        "Defense": "defense",
+        "Sp. Atk": "sp_atk",
+        "Sp. Def": "sp_def",
+        "Speed": "speed",
     }
 
     stats = {
-        "hp":      hp,
-        "attack":  attack,
+        "hp": hp,
+        "attack": attack,
         "defense": defense,
-        "sp_atk":  sp_atk,
-        "sp_def":  sp_def,
-        "speed":   speed,
+        "sp_atk": sp_atk,
+        "sp_def": sp_def,
+        "speed": speed,
     }
 
     if stat_up and stat_up in stat_map:
@@ -95,36 +123,46 @@ def get_pokemon_stats_with_nature(con, team_pokemon_id):
         key = stat_map[stat_down]
         stats[key] = round(stats[key] * 0.9)
 
-    return stats    
+    return stats
 
 
 def get_first_move_for_pokemon(con, pokemon_id):
-    return con.execute("""
+    return con.execute(
+        """
         SELECT move_id FROM pokemon_move
         WHERE pokemon_id = ?
         ORDER BY pokemon_move_id
         LIMIT 1
-    """, (pokemon_id,)).fetchone()
+    """,
+        (pokemon_id,),
+    ).fetchone()
 
 
 def pokemon_can_learn_move(con, pokemon_id, move_id):
-    result = con.execute("""
+    result = con.execute(
+        """
         SELECT COUNT(*) FROM pokemon_move
         WHERE pokemon_id = ? AND move_id = ?
-    """, (pokemon_id, move_id)).fetchone()
+    """,
+        (pokemon_id, move_id),
+    ).fetchone()
     return result[0] > 0
 
 
 def get_move_by_name(con, move_name):
-    return con.execute("""
+    return con.execute(
+        """
         SELECT move_id, move_name FROM move
         WHERE LOWER(move_name) = LOWER(?)
-    """, (move_name,)).fetchone()
+    """,
+        (move_name,),
+    ).fetchone()
 
 
 # ---------------------------------------------------------------------------
 # Input helpers
 # ---------------------------------------------------------------------------
+
 
 def prompt_int(prompt, min_val, max_val, allow_quit=True):
     """Prompt for an integer. Returns None if user types 'q'."""
@@ -136,7 +174,9 @@ def prompt_int(prompt, min_val, max_val, allow_quit=True):
             val = int(raw)
             if min_val <= val <= max_val:
                 return val
-            print(f"  Please enter a number between {min_val} and {max_val} (or 'q' to cancel).")
+            print(
+                f"  Please enter a number between {min_val} and {max_val} (or 'q' to cancel)."
+            )
         except ValueError:
             print("  Invalid input — please enter a number (or 'q' to cancel).")
 
@@ -148,11 +188,14 @@ def search_and_select_pokemon(con):
         if search.lower() == "q":
             return None
 
-        matches = con.execute("""
+        matches = con.execute(
+            """
             SELECT pokemon_id, TRIM(name, '"') AS name FROM pokemon
             WHERE LOWER(TRIM(name, '"')) LIKE LOWER(?)
             ORDER BY name
-        """, (f"%{search}%",)).fetchall()
+        """,
+            (f"%{search}%",),
+        ).fetchall()
 
         if not matches:
             print("  No pokemon found. Try again.")
@@ -162,7 +205,9 @@ def search_and_select_pokemon(con):
         for i, (pid, name) in enumerate(matches, 1):
             print(f"  {i}. {name} (#{pid})")
 
-        choice = prompt_int("Select number (0 to search again, q to cancel): ", 0, len(matches))
+        choice = prompt_int(
+            "Select number (0 to search again, q to cancel): ", 0, len(matches)
+        )
         if choice is None:
             return None
         if choice == 0:
@@ -198,7 +243,7 @@ def select_nature(con):
     natures = get_all_natures(con)
     print("\nNatures:")
     for nature_id, name, stat_up, stat_down in natures:
-        up   = f"+{stat_up}"   if stat_up   else "none"
+        up = f"+{stat_up}" if stat_up else "none"
         down = f"-{stat_down}" if stat_down else "none"
         print(f"  {nature_id:2}. {name:<10} {up:<12} {down}")
 
@@ -212,13 +257,16 @@ def select_nature(con):
 # Team actions
 # ---------------------------------------------------------------------------
 
+
 def create_new_team(con):
     print("\n--- New Team ---")
     team_name = input("Enter team name (or 'q' to cancel): ").strip()
     if not team_name or team_name.lower() == "q":
         return
 
-    exists = con.execute("SELECT COUNT(*) FROM team WHERE team_name = ?", (team_name,)).fetchone()[0]
+    exists = con.execute(
+        "SELECT COUNT(*) FROM team WHERE team_name = ?", (team_name,)
+    ).fetchone()[0]
     if exists:
         print(f"  A team named '{team_name}' already exists.")
         return
@@ -247,22 +295,30 @@ def add_pokemon_to_team(con, team_id):
     if nature_id is None:
         return
 
-    insert_team_pokemon(con, {
-        "team_id":    team_id,
-        "pokemon_id": pokemon_id,
-        "ability_id": ability_id,
-        "nature_id":  nature_id,
-    })
+    insert_team_pokemon(
+        con,
+        {
+            "team_id": team_id,
+            "pokemon_id": pokemon_id,
+            "ability_id": ability_id,
+            "nature_id": nature_id,
+        },
+    )
 
-    tp_id = con.execute("""
+    tp_id = con.execute(
+        """
         SELECT team_pokemon_id FROM team_pokemon
         WHERE team_id = ? AND pokemon_id = ?
         ORDER BY team_pokemon_id DESC LIMIT 1
-    """, (team_id, pokemon_id)).fetchone()[0]
+    """,
+        (team_id, pokemon_id),
+    ).fetchone()[0]
 
     first_move = get_first_move_for_pokemon(con, pokemon_id)
     if first_move:
-        insert_team_pokemon_move(con, [{"team_pokemon_id": tp_id, "move_id": first_move[0]}])
+        insert_team_pokemon_move(
+            con, [{"team_pokemon_id": tp_id, "move_id": first_move[0]}]
+        )
 
     print(f"  {pokemon_name} added!")
 
@@ -283,25 +339,37 @@ def change_pokemon(con, team_id, team_pokemon_id, old_name):
     if nature_id is None:
         return
 
-    con.execute("DELETE FROM team_pokemon_move WHERE team_pokemon_id = ?", (team_pokemon_id,))
-    con.execute("DELETE FROM team_pokemon WHERE team_pokemon_id = ?", (team_pokemon_id,))
+    con.execute(
+        "DELETE FROM team_pokemon_move WHERE team_pokemon_id = ?", (team_pokemon_id,)
+    )
+    con.execute(
+        "DELETE FROM team_pokemon WHERE team_pokemon_id = ?", (team_pokemon_id,)
+    )
 
-    insert_team_pokemon(con, {
-        "team_id":    team_id,
-        "pokemon_id": pokemon_id,
-        "ability_id": ability_id,
-        "nature_id":  nature_id,
-    })
+    insert_team_pokemon(
+        con,
+        {
+            "team_id": team_id,
+            "pokemon_id": pokemon_id,
+            "ability_id": ability_id,
+            "nature_id": nature_id,
+        },
+    )
 
-    tp_id = con.execute("""
+    tp_id = con.execute(
+        """
         SELECT team_pokemon_id FROM team_pokemon
         WHERE team_id = ? AND pokemon_id = ?
         ORDER BY team_pokemon_id DESC LIMIT 1
-    """, (team_id, pokemon_id)).fetchone()[0]
+    """,
+        (team_id, pokemon_id),
+    ).fetchone()[0]
 
     first_move = get_first_move_for_pokemon(con, pokemon_id)
     if first_move:
-        insert_team_pokemon_move(con, [{"team_pokemon_id": tp_id, "move_id": first_move[0]}])
+        insert_team_pokemon_move(
+            con, [{"team_pokemon_id": tp_id, "move_id": first_move[0]}]
+        )
 
     print(f"  {old_name} replaced with {pokemon_name}!")
 
@@ -322,7 +390,8 @@ def edit_pokemon_moves(con, team_pokemon_id, pokemon_id, pokemon_name):
 
     tpm_id_to_replace = moves[slot - 1][0] if slot <= len(moves) else None
 
-    top_moves = con.execute("""
+    top_moves = con.execute(
+        """
         SELECT DISTINCT m.move_name, m.power, m.type, m.category
         FROM pokemon_move pm
         JOIN move m ON pm.move_id = m.move_id
@@ -330,11 +399,15 @@ def edit_pokemon_moves(con, team_pokemon_id, pokemon_id, pokemon_name):
           AND m.power IS NOT NULL
         ORDER BY m.power DESC
         LIMIT 10
-    """, (pokemon_id,)).fetchall()
+    """,
+        (pokemon_id,),
+    ).fetchall()
 
     print(f"\nTop 10 moves for {pokemon_name} by power:")
     for move_name, power, mtype, category in top_moves:
-        print(f"  {move_name:<20} Power: {power:<5} Type: {mtype:<10} Category: {category}")
+        print(
+            f"  {move_name:<20} Power: {power:<5} Type: {mtype:<10} Category: {category}"
+        )
 
     while True:
         move_name_input = input("\nEnter move name (or 'q' to cancel): ").strip()
@@ -352,8 +425,13 @@ def edit_pokemon_moves(con, team_pokemon_id, pokemon_id, pokemon_name):
             continue
 
         if tpm_id_to_replace:
-            con.execute("DELETE FROM team_pokemon_move WHERE team_pokemon_move_id = ?", (tpm_id_to_replace,))
-        insert_team_pokemon_move(con, [{"team_pokemon_id": team_pokemon_id, "move_id": move_id}])
+            con.execute(
+                "DELETE FROM team_pokemon_move WHERE team_pokemon_move_id = ?",
+                (tpm_id_to_replace,),
+            )
+        insert_team_pokemon_move(
+            con, [{"team_pokemon_id": team_pokemon_id, "move_id": move_id}]
+        )
         print(f"  Slot {slot} updated to {move_name}!")
         break
 
@@ -370,8 +448,10 @@ def edit_team(con, team_id, team_name):
                 move_names = ", ".join(m[1] for m in moves) if moves else "no moves"
                 stats = get_pokemon_stats_with_nature(con, tp_id)
                 print(f"  {i}. {name} — [{move_names}]")
-                print(f"       HP:{stats['hp']} ATK:{stats['attack']} DEF:{stats['defense']} "
-                      f"SpA:{stats['sp_atk']} SpD:{stats['sp_def']} SPE:{stats['speed']}")
+                print(
+                    f"       HP:{stats['hp']} ATK:{stats['attack']} DEF:{stats['defense']} "
+                    f"SpA:{stats['sp_atk']} SpD:{stats['sp_def']} SPE:{stats['speed']}"
+                )
         else:
             print("  (no pokemon yet)")
 
@@ -388,13 +468,17 @@ def edit_team(con, team_id, team_name):
         if choice == "a" and len(pokemon_list) < 6:
             add_pokemon_to_team(con, team_id)
         elif choice == "m" and pokemon_list:
-            idx = prompt_int("Select pokemon number (or 'q' to cancel): ", 1, len(pokemon_list))
+            idx = prompt_int(
+                "Select pokemon number (or 'q' to cancel): ", 1, len(pokemon_list)
+            )
             if idx is None:
                 continue
             tp_id, pname, pid = pokemon_list[idx - 1]
             edit_pokemon_moves(con, tp_id, pid, pname)
         elif choice == "c" and pokemon_list:
-            idx = prompt_int("Select pokemon to replace (or 'q' to cancel): ", 1, len(pokemon_list))
+            idx = prompt_int(
+                "Select pokemon to replace (or 'q' to cancel): ", 1, len(pokemon_list)
+            )
             if idx is None:
                 continue
             tp_id, pname, pid = pokemon_list[idx - 1]
@@ -408,6 +492,7 @@ def edit_team(con, team_id, team_name):
 # ---------------------------------------------------------------------------
 # Main menu
 # ---------------------------------------------------------------------------
+
 
 def _main_menu(con):
     while True:
@@ -450,11 +535,11 @@ def _main_menu(con):
 # Public entry point
 # ---------------------------------------------------------------------------
 
+
 def team_editor():
     """Launch the Pykemon team editor CLI."""
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     con = duckdb.connect(DB_PATH)
-    make_db(con)
     _main_menu(con)
     con.close()
 
